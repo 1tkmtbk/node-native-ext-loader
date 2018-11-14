@@ -43,7 +43,7 @@ module.exports = function(content) {
 
     return (
       "const path = require('path');" +
-      "const filePath = path.resolve(__dirname, " +
+      "const filePath = path.resolve(path.resolve(''), " +
       filePath +
       ");" +
       "try { global.process.dlopen(module, filePath); } " +
