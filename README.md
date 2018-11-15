@@ -40,7 +40,8 @@ module: {
       test: /\.node$/,
       loader: "native-ext-loader",
       options: {
-        rewritePath: path.resolve(__dirname, "dist")
+        pathReg: /.*(node_modules[\/\\].*\.node$)/,
+        basePath: ['resources', 'app'],
       }
     }
   ];
@@ -53,15 +54,15 @@ It allows adjusting path to the native module. The array will be concatenated wi
 
 Note that `basePath` is ignored when `rewritePath` option is used.
 
-### `rewritePath` (default: `undefined`)
+### `pathReg` (default: `undefined`)
 
-It allows to set an absolute paths to native files.
+node_modules 以下の *.node ファイルまでのパスに関して、実行時の current working directory から正規表現の$1に該当するパスを native files のパスとして設定します。
 
-Note that it needs to remain `undefined` if you are building a package with embedded files. This way, the compiled application will work no matter of its location. This is important when building Electron applications that can be placed in any directory by the end user.
+basePath の指定がある場合、上記のパスの前に追加します。例では package 時のパスを想定しています。開発時は未設定で構わないと思います。
 
-### `emit` (default: `true`)
+別途、*.node ファイルのあるフォルダを該当パスへDLL等含めてコピーする必要があります。
+自動化できるもんならしたいところですが。。現状、知識不足です。
 
-Specifies whether the imported `.node` file will be copied to the output directory.
 
 ## Releasing a new version
 

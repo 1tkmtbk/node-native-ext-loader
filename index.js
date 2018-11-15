@@ -3,39 +3,22 @@ var path = require("path");
 module.exports = function(content) {
   const defaultConfig = {
     basePath: [],
-    rewritePath: undefined,
-    emit: true
   };
 
   const config = Object.assign(defaultConfig, this.query);
   const fileName = path.basename(this.resourcePath);
 
-  if (config.emit) {
-    if (this.emitFile) {
-      this.emitFile(fileName, content, false);
-    } else {
-      throw new Error("emitFile function is not available");
-    }
-  }
-  
-  this.addDependency(this.resourcePath);
-
-  if (config.rewritePath) {
-    let filePath;
-
-    if (config.rewritePath === "./" || config.rewritePath === ".\\") {
-      filePath = JSON.stringify(config.rewritePath + fileName);
-    } else {
-      filePath = JSON.stringify(path.join(config.rewritePath, fileName));
-    }
-
+  if(config.pathReg) {
+    const filePaths = this.resourcePath.replace(config.pathReg, '$1').split(/[\\\/]/);
+    const filePathArray = config.basePath.concat(filePaths);
+    const filePath = JSON.stringify(filePathArray).slice(1, -1);
     return (
-      "try { global.process.dlopen(module, " +
+      "const path = require('path');" +
+      "const filePath = path.resolve(path.resolve(''), " +
       filePath +
-      "); } " +
-      "catch(exception) { throw new Error('Cannot open ' + " +
-      filePath +
-      " + ': ' + exception); };"
+      ");" +
+      "try { global.process.dlopen(module, filePath); } " +
+      "catch(exception) { throw new Error('Cannot open ' + filePath + ': ' + exception); };"
     );
   } else {
     const filePathArray = config.basePath.concat(fileName);
